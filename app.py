@@ -22,26 +22,16 @@ st.set_page_config(
 
 @st.cache_resource
 def load_model():
-    """
-    Downloads model from Google Drive on first run,
-    then loads and caches it for all subsequent requests.
-    """
     import tensorflow as tf
     import gdown
 
     model_path = 'nigerian_food_final.keras'
 
-    # Download from Drive if not already present
     if not os.path.exists(model_path):
-        with st.spinner("Downloading model... (first load only, please wait)"):
-
-            # Replace this with YOUR actual file ID from Step 1
-            FILE_ID  = '1fBsrvG9QyAGmmML2E3M0G3yYtktz64CH'
-            url      = f'https://drive.google.com/uc?id={FILE_ID}'
-
+        with st.spinner("Downloading model... (first load only)"):
+            FILE_ID = 'YOUR_GOOGLE_DRIVE_FILE_ID_HERE'
+            url     = f'https://drive.google.com/uc?id={FILE_ID}'
             gdown.download(url, model_path, quiet=False)
-
-        st.success("Model downloaded successfully.")
 
     model = tf.keras.models.load_model(model_path)
     return model
