@@ -44,16 +44,32 @@ def load_class_indices():
 # -------------------------------------------------------
 
 def preprocess_image(image: Image.Image) -> np.ndarray:
+    """
+    Replicates tf.keras.applications.efficientnet.preprocess_input exactly.
+    EfficientNet uses torch-style normalisation:
+        1. Scale to [0, 1]
+        2. Subtract ImageNet channel means
+        3. Divide by ImageNet channel stds
+    """
     image     = image.convert('RGB')
     image     = image.resize((224, 224))
     img_array = np.array(image, dtype=np.float32)
 
-    # EfficientNet preprocessing without TensorFlow
+    # Step 1 — scale to [0, 1]
     img_array = img_array / 255.0
+
+    # Step 2 — subtract ImageNet means per channel (R, G, B)
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    img_array = img_array - mean
+
+    # Step 3 — divide by ImageNet stds per channel (R, G, B)
+    std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+    img_array = img_array / std
+
+    # Add batch dimension: (224, 224, 3) → (1, 224, 224, 3)
     img_array = np.expand_dims(img_array, axis=0).astype(np.float32)
 
     return img_array
-
 
 # -------------------------------------------------------
 # PREDICTION
@@ -152,7 +168,7 @@ def main():
 
         with col1:
             st.markdown("**Uploaded Image**")
-            st.image(image, use_column_width=True)
+            st.image(image, use_container_width=True)
             st.caption(f"Size: {image.size[0]} x {image.size[1]}px")
 
         with col2:
